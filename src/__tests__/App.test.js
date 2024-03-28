@@ -64,3 +64,53 @@ test("displays a top-level heading with the text `Hi, I'm _______`", () => {
       expect.stringContaining("https://linkedin.com")
     );
   });
+  test("the page shows information the user types into the name and email address form fields", () => {
+    render(<App />);
+  
+    const fullName = screen.getByLabelText(/enter your name/i);
+    const emailAddress = screen.getByLabelText(/enter your email address/i);
+  
+    userEvent.type(fullName, "Fname Lname");
+    userEvent.type(emailAddress, "fnamelname@email.com");
+  
+    expect(fullName).toHaveValue("Fname Lname");
+    expect(emailAddress).toHaveValue("fnamelname@email.com");
+  });
+  
+  test("checked status of checkboxes changes when user clicks them", () => {
+    render(<App />);
+  
+    const interest1 = screen.getByRole("checkbox", { name: /interest 1/i });
+    const interest2 = screen.getByRole("checkbox", { name: /interest 2/i });
+    const interest3 = screen.getByRole("checkbox", { name: /interest 3/i });
+  
+    userEvent.click(interest1);
+    userEvent.click(interest2);
+    userEvent.click(interest3);
+  
+    expect(interest1).toBeChecked();
+    expect(interest2).toBeChecked();
+    expect(interest3).toBeChecked();
+  });
+  
+  test("a message is displayed when the user clicks the Submit button", () => {
+    render(<App />);
+  
+    userEvent.type(screen.getByLabelText(/enter your name/i), "Fname Lname");
+    userEvent.type(
+      screen.getByLabelText(/enter your email address/i),
+      "fnamelname@email.com"
+    );
+    userEvent.click(screen.getByRole("checkbox", { name: /interest 1/i }));
+    userEvent.click(screen.getByRole("checkbox", { name: /interest 3/i }));
+    userEvent.click(screen.getByRole("button", { name: /submit/i }));
+  
+    expect(
+      screen.getByText(
+        "Thanks Fname Lname! You are signed up for these newsletters:"
+      )
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole("listitem").length).toBe(2);
+    expect(screen.getByText("Interest 1")).toBeInTheDocument();
+    expect(screen.getByText("Interest 3")).toBeInTheDocument();
+  });
